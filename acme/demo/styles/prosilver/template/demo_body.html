@@ -1,0 +1,27 @@
+<!-- INCLUDE overall_header.html -->
+
+<div id="map" style="height: 500px"></div>
+<script>
+    function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 6,
+            center: {lat: 52.5, lng: 18.511111}
+        }),
+        data = JSON.parse('{USERS_DATA}');
+        data.forEach(function(row){
+            addMarker( row.location, row.username, map);
+        });
+    }
+    function addMarker(location, title, map){
+        var marker = new google.maps.Marker({
+            position: location,
+            map: map,
+            title: title
+        });
+    }
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9cdVa1Xv67KF59xxpflyPrjHzKI_uDgY&callback=initMap">
+</script>
+
+<!-- INCLUDE overall_footer.html -->

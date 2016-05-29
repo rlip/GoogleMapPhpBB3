@@ -61,7 +61,7 @@ class main
                 continue;
             }
             $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyD8PmCFAu-YX0KbsBW0ipItmGeUUYQcgKw&address='. $sCode;
-            $json = file_get_contents($sUrl);
+            $json = @file_get_contents($sUrl);
             $json = json_decode($json);
             if(empty($json->results)){
                 continue;

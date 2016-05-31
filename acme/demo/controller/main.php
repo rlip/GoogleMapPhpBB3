@@ -55,24 +55,30 @@ class main
 			WHERE pf_postal_code IS NOT NULL';
         $result = $db->sql_query($sql);
         $aData = array();
+
         while ($row = $db->sql_fetchrow($result)) {
-            $sCode =  preg_replace('/[^0-9\-]/', '', $row['pf_postal_code']);
-            if(strlen($sCode) != 6){
+            $sCode = preg_replace('/[^0-9\-]/', '', $row['pf_postal_code']);
+            if (strlen($sCode) != 6) {
                 continue;
             }
-            $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyD8PmCFAu-YX0KbsBW0ipItmGeUUYQcgKw&address='. $sCode;
+            $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCuVMJO4EO6d_zXVzm-V3_1-9c24TBU9Ps&address=' . $sCode . '%20Poland';
             $json = @file_get_contents($sUrl);
             $json = json_decode($json);
-            if(empty($json->results)){
+            if (empty($json->results)) {
                 continue;
             }
             $location = $json->results[0]->geometry->location;
-            $aData[] = array(
+            $sKey = 'loc_' . $location->lat . $location->lng;
+            while (isset($aData[$sKey])) {
+                $location->lng = $location->lng + 0.1;
+                $sKey = 'loc_' . $location->lat . $location->lng;
+            }
+            $aData[$sKey] = array(
                 'username' => $row['username'],
                 'location' => $location
             );
         }
-        $this->template->assign_var('USERS_DATA', json_encode($aData));
+        $this->template->assign_var('USERS_DATA', json_encode(array_values($aData)));
         return $this->helper->render('demo_body.html', $name);
     }
 }

@@ -4,24 +4,31 @@
 <script>
     function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 6,
-            center: {lat: 52.5, lng: 18.511111}
-        }),
-        data = JSON.parse('{USERS_DATA}');
-        data.forEach(function(row){
-            addMarker( row.location, row.username, map);
+                    zoom: 6,
+                    center: {lat: 52.5, lng: 18.5}
+                }),
+                data = JSON.parse('{USERS_DATA}');
+        data.forEach(function (row) {
+            addMarker(row.location, row.username, map);
         });
     }
-    function addMarker(location, title, map){
+    function addMarker(location, username, map) {
         var marker = new google.maps.Marker({
-            position: location,
-            map: map,
-            title: title
+                    position: location,
+                    animation: google.maps.Animation.DROP,
+                    map: map,
+                    title: username
+                }),
+                infowindow = new google.maps.InfoWindow({
+                    content: '<div><strong><a href="{ROOT_PATH}/memberlist.php?mode=viewprofile&un={S_USERNAME}">' + username + '</a></strong></div>'
+                });
+        marker.addListener('click', function () {
+            infowindow.open(map, marker);
         });
     }
 </script>
 <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9cdVa1Xv67KF59xxpflyPrjHzKI_uDgY&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPmc3roNWNNKp3HKD9IfYDkiKCJgNCANc&callback=initMap">
 </script>
 
 <!-- INCLUDE overall_footer.html -->

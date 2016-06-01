@@ -20,7 +20,7 @@
                     title: username
                 }),
                 infowindow = new google.maps.InfoWindow({
-                    content: '<div><strong><a href="{ROOT_PATH}/memberlist.php?mode=viewprofile&un=' + username + '">' + username + '</a></strong></div>'
+                    content: '<div><strong><a href="{ROOT_PATH}memberlist.php?mode=viewprofile&un=' + username + '">' + username + '</a></strong></div>'
                 });
         marker.addListener('click', function () {
             infowindow.open(map, marker);

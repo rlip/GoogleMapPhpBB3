@@ -48,11 +48,11 @@ class main
     public function handle($name)
     {
         global $db, $user;
-
+        $i2MonthsBefore = time() - (60 * 60 * 24 * 30 * 2);
         $sql = 'SELECT username, pf_postal_code
 			FROM ' . PROFILE_FIELDS_DATA_TABLE . ' data_tab
 			INNER JOIN ' . USERS_TABLE . ' users_tab on data_tab.user_id = users_tab.user_id
-			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0';
+			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0 AND user_lastvisit > ' . $i2MonthsBefore;
         $result = $db->sql_query($sql);
         $aData = array();
 

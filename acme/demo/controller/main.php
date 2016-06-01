@@ -63,6 +63,9 @@ class main
             }
             $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCuVMJO4EO6d_zXVzm-V3_1-9c24TBU9Ps&address=' . $sCode . '%20Poland';
             $json = @file_get_contents($sUrl);
+            if(!$json){
+                continue;
+            }
             $json = json_decode($json);
             if (empty($json->results)) {
                 continue;

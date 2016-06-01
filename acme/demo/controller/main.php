@@ -52,7 +52,7 @@ class main
         $sql = 'SELECT username, pf_postal_code
 			FROM ' . PROFILE_FIELDS_DATA_TABLE . ' data_tab
 			INNER JOIN ' . USERS_TABLE . ' users_tab on data_tab.user_id = users_tab.user_id
-			WHERE pf_postal_code IS NOT NULL AND pf_postal_code !=  ""';
+			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != ""';
         $result = $db->sql_query($sql);
         $aData = array();
 

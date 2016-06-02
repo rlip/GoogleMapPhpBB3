@@ -3,16 +3,14 @@
 <div id="map" style="height: 500px"></div>
 <script type="text/javascript"
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPmc3roNWNNKp3HKD9IfYDkiKCJgNCANc"></script>
-<script type="text/javascript"
-        src="https://googlemaps.github.io/js-marker-clusterer/src/markerclusterer.js"></script>
+<script type="text/javascript" src="/ext/acme/demo/js/markerclusterer.js"></script>
 <script>
     function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 6,
                     center: {lat: 52, lng: 18.7}
                 }),
-//                data = JSON.parse('{USERS_DATA}'),
-                data = JSON.parse('[{"username":"Sufixx","location":{"lat":51.1082,"lng":17.036314}},{"username":"Coldman","location":{"lat":51.8351387,"lng":17.8973748}},{"username":"Polan","location":{"lat":52.2528648,"lng":21.0339202}},{"username":"rlip","location":{"lat":50.6590766,"lng":17.9875326}},{"username":"tomektomek","location":{"lat":53.9656066,"lng":18.4707546}},{"username":"Des","location":{"lat":53.7636896,"lng":18.1983893}},{"username":"impresjonistka","location":{"lat":54.4308586,"lng":17.1208009}},{"username":"nat_24","location":{"lat":50.629234,"lng":23.015486}},{"username":"Kuba","location":{"lat":51.1030254,"lng":17.028923}}]'),
+                data = JSON.parse('{USERS_DATA}'),
                 markers = [];
         data.forEach(function (row) {
             markers.push(getMarker(row.location, row.username));

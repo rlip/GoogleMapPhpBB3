@@ -49,10 +49,13 @@ class main
     {
         global $db, $user;
         $i2MonthsBefore = time() - (60 * 60 * 24 * 30 * 2);
-        $sql = 'SELECT username, pf_postal_code
+        $sql = 'SELECT username, pf_postal_code, latitude, longitude
 			FROM ' . PROFILE_FIELDS_DATA_TABLE . ' data_tab
 			INNER JOIN ' . USERS_TABLE . ' users_tab on data_tab.user_id = users_tab.user_id
-			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0 AND user_lastvisit > ' . $i2MonthsBefore;
+			LEFT JOIN phpbb_postal_code_location location_tab on location_tab.postal_code = data_tab.pf_postal_code
+			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0 AND user_lastvisit > ' . $i2MonthsBefore . '
+			GROUP BY username';
+
         $result = $db->sql_query($sql);
         $aData = array();
 
@@ -61,24 +64,50 @@ class main
             if (strlen($sCode) != 6) {
                 continue;
             }
-            $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCuVMJO4EO6d_zXVzm-V3_1-9c24TBU9Ps&address=' . $sCode . '%20Poland';
-            $json = @file_get_contents($sUrl);
-            if(!$json){
-                continue;
+            if (!$row['latitude'] || !$row['longitude']) {
+                $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCuVMJO4EO6d_zXVzm-V3_1-9c24TBU9Ps&address=' . $sCode . '%20Poland';
+                $json = @file_get_contents($sUrl);
+                if (!$json) {
+                    continue;
+                }
+                $json = json_decode($json);
+                if (empty($json->results)) {
+                    continue;
+                }
+                $location = $json->results[0]->geometry->location;
+                $fLatitude = $location->lat;
+                $fLongitude = $location->lng;
+                $sql = "CREATE TABLE IF NOT EXISTS `phpbb_postal_code_location` (
+                        `id` INT(11) NOT NULL AUTO_INCREMENT,
+                        `postal_code` VARCHAR(6) NOT NULL,
+                        `latitude` DECIMAL(10,7) NOT NULL,
+                        `longitude` DECIMAL(10,7) NOT NULL,
+                        PRIMARY KEY (`id`),
+                        UNIQUE INDEX `postal_code_unique` (`postal_code`),
+                        INDEX `postal_code` (`postal_code`)
+                    )
+                    ENGINE=InnoDB";
+                $db->sql_query($sql);
+                $sql = 'INSERT IGNORE INTO phpbb_postal_code_location ' . $db->sql_build_array('INSERT', array(
+                        'postal_code' => $sCode,
+                        'latitude' => $fLatitude,
+                        'longitude' => $fLongitude
+                    ));
+                $db->sql_query($sql);
+            } else {
+                $fLatitude = floatval($row['latitude']);
+                $fLongitude = floatval($row['longitude']);
             }
-            $json = json_decode($json);
-            if (empty($json->results)) {
-                continue;
-            }
-            $location = $json->results[0]->geometry->location;
-            $sKey = 'loc_' . $location->lat . $location->lng;
-            while (isset($aData[$sKey])) {
-                $location->lng = $location->lng + 0.1;
-                $sKey = 'loc_' . $location->lat . $location->lng;
-            }
+            $oLocation = new \stdClass();
+            do {
+                $sKey = 'loc_' . $fLatitude . '_' . $fLongitude;
+                $oLocation->lat = $fLatitude;
+                $oLocation->lng = $fLongitude;
+                $fLongitude = $fLongitude + 0.05;
+            } while (isset($aData[$sKey]));
             $aData[$sKey] = array(
                 'username' => $row['username'],
-                'location' => $location
+                'location' => $oLocation
             );
         }
         $this->template->assign_var('USERS_DATA', json_encode(array_values($aData)));

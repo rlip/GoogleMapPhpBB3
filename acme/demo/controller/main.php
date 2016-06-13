@@ -49,21 +49,16 @@ class main
     {
         global $db, $user;
         $i2MonthsBefore = time() - (60 * 60 * 24 * 30 * 2);
-        $sql = "CREATE TABLE IF NOT EXISTS `phpbb_postal_code_location` (
-                        `id` INT(11) NOT NULL AUTO_INCREMENT,
-                        `postal_code` VARCHAR(6) NOT NULL,
-                        `latitude` DECIMAL(10,7) NOT NULL,
-                        `longitude` DECIMAL(10,7) NOT NULL,
-                        PRIMARY KEY (`id`),
-                        UNIQUE INDEX `postal_code_unique` (`postal_code`),
-                        INDEX `postal_code` (`postal_code`)
-                    )
-                    ENGINE=InnoDB";
-        $db->sql_query($sql);
         $sql = 'SELECT username, pf_postal_code, latitude, longitude
 			FROM ' . PROFILE_FIELDS_DATA_TABLE . ' data_tab
 			INNER JOIN ' . USERS_TABLE . ' users_tab on data_tab.user_id = users_tab.user_id
 			LEFT JOIN phpbb_postal_code_location location_tab on location_tab.postal_code = data_tab.pf_postal_code
+			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0 AND user_lastvisit > ' . $i2MonthsBefore . '
+			GROUP BY username';
+        //  @todo! 
+        $sql = 'SELECT username, pf_postal_code
+			FROM ' . PROFILE_FIELDS_DATA_TABLE . ' data_tab
+			INNER JOIN ' . USERS_TABLE . ' users_tab on data_tab.user_id = users_tab.user_id
 			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0 AND user_lastvisit > ' . $i2MonthsBefore . '
 			GROUP BY username';
 
@@ -93,7 +88,7 @@ class main
                         'latitude' => $fLatitude,
                         'longitude' => $fLongitude
                     ));
-                $db->sql_query($sql);
+//  @todo!              $db->sql_query($sql);
             } else {
                 $fLatitude = floatval($row['latitude']);
                 $fLongitude = floatval($row['longitude']);

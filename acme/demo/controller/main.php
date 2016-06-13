@@ -55,7 +55,7 @@ class main
 			LEFT JOIN phpbb_postal_code_location location_tab on location_tab.postal_code = data_tab.pf_postal_code
 			WHERE pf_postal_code IS NOT NULL AND pf_postal_code != "" AND user_inactive_reason = 0 AND user_lastvisit > ' . $i2MonthsBefore . '
 			GROUP BY username';
-        //  @todo! 
+        //  @todo!
         $sql = 'SELECT username, pf_postal_code
 			FROM ' . PROFILE_FIELDS_DATA_TABLE . ' data_tab
 			INNER JOIN ' . USERS_TABLE . ' users_tab on data_tab.user_id = users_tab.user_id
@@ -70,7 +70,7 @@ class main
             if (strlen($sCode) != 6) {
                 continue;
             }
-            if (!$row['latitude'] || !$row['longitude']) {
+            if (!isset($row['latitude']) || !isset($row['longitude']) || !$row['latitude'] || !$row['longitude']) {
                 $sUrl = 'https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCuVMJO4EO6d_zXVzm-V3_1-9c24TBU9Ps&address=' . $sCode . '%20Poland';
                 $json = @file_get_contents($sUrl);
                 if (!$json) {

@@ -1,0 +1,3 @@
+rlip_usersmap_controller:
+    path: /usersmap/{name}
+    defaults: { _controller: rlip.usersmap.controller:handle }

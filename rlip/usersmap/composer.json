@@ -1,0 +1,28 @@
+{
+	"name": "rlip/usersmap",
+	"type": "phpbb-extension",
+	"description": "Rlip Usersmap Extension for phpBB 3.1",
+	"homepage": "https://github.com/rlip/GoogleMapPhpBB3",
+	"version": "0.1.0",
+	"time": "2016-06-22",
+	"license": "GPL-2.0",
+	"authors": [{
+			"name": "Roman Lip",
+			"email": "",
+			"homepage": "",
+			"role": ""
+		}],
+	"require": {
+		"php": ">=5.3.3",
+		"composer/installers": "~1.0"
+	},
+	"require-dev": {
+		"phpbb/epv": "dev-master"
+	},
+	"extra": {
+		"display-name": "Rlip Usersmap Extension",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.1.0-RC2,<3.2@dev"
+		}
+	}
+}

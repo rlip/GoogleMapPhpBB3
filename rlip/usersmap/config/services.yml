@@ -1,0 +1,15 @@
+services:
+    rlip.usersmap.controller:
+        class: rlip\usersmap\controller\main
+        arguments:
+            - '@config'
+            - '@controller.helper'
+            - '@template'
+            - '@user'
+    rlip.usersmap.listener:
+        class: rlip\usersmap\event\main_listener
+        arguments:
+            - '@controller.helper'
+            - '@template'
+        tags:
+            - { name: event.listener }

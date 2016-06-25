@@ -40,6 +40,32 @@ class release_1_0_0 extends \phpbb\db\migration\migration
                     'modes' => array('settings'),
                 ),
             )),
+            array('custom', array(array($this, 'create_tables'))),
         );
     }
+    public function create_tables()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS`" . $this->table_prefix . "postal_code_location` (" .
+            " `id` INT(11) NOT NULL AUTO_INCREMENT," .
+            " `postal_code` VARCHAR(6) NOT NULL," .
+            " `latitude` DECIMAL(10,7) NOT NULL," .
+            " `longitude` DECIMAL(10,7) NOT NULL," .
+            " PRIMARY KEY (`id`)," .
+            " UNIQUE INDEX `postal_code_unique` (`postal_code`)," .
+            " INDEX `postal_code` (`postal_code`)" .
+            " )" .
+            " COLLATE='utf8_general_ci'" .
+            " ENGINE=InnoDB";
+        $this->sql_query($sql);
+    }
+
+    public function revert_schema()
+    {
+        return array(
+            'drop_tables' => array(
+                $this->table_prefix . 'postal_code_location',
+            ),
+        );
+    }
+
 }

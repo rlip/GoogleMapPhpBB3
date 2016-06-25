@@ -1,0 +1,3 @@
+rlip_intereststree_controller:
+    path: /intereststree/{name}
+    defaults: { _controller: rlip.intereststree.controller:handle }

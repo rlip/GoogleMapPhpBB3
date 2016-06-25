@@ -1,0 +1,15 @@
+services:
+    rlip.intereststree.controller:
+        class: rlip\intereststree\controller\main
+        arguments:
+            - '@config'
+            - '@controller.helper'
+            - '@template'
+            - '@user'
+    rlip.intereststree.listener:
+        class: rlip\intereststree\event\main_listener
+        arguments:
+            - '@controller.helper'
+            - '@template'
+        tags:
+            - { name: event.listener }

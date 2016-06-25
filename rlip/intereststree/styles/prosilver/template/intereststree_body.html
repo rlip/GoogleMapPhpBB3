@@ -1,0 +1,28 @@
+<!-- INCLUDE overall_header.html -->
+<!-- IF S_USER_LOGGED_IN -->
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery.min.js"></script>
+<script type="text/javascript"
+        src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery-migrate.min.js"></script>
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery.history.js"></script>
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/raphael-min.js"></script>
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/tween.js"></script>
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/bubbletree.js"></script>
+<link rel="stylesheet" type="text/css" href="/ext/rlip/intereststree/styles/prosilver/template/css/bubbletree.css"/>
+
+<script type="text/javascript">
+    $(function () {
+        var data = JSON.parse('{INTERESTS_DATA}');
+
+        new BubbleTree({
+            data: data,
+            autoColors: true,
+            container: '.bubbletree',
+            sortBy: 'label'
+        });
+    });
+</script>
+<div class="bubbletree-wrapper">
+    <div class="bubbletree"></div>
+</div>
+<!-- ENDIF -->
+<!-- INCLUDE overall_footer.html -->

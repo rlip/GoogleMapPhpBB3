@@ -24,6 +24,33 @@
     position: relative;
 }
 
+#proposals-table .vote span{
+    padding: 2px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+#proposals-table .vote.no-voted .vote-plus{
+    color: #3b915f;
+}
+#proposals-table .vote.no-voted .vote-minus{
+    color: #c0392b;
+}
+
+#proposals-table .vote.voted-plus .vote-plus{
+    background-color: #3b915f;
+    color: #fff;
+}
+#proposals-table .vote.voted-minus .vote-minus{
+    background-color: #c0392b;
+    color: #fff;
+}
+
+#proposals-table .vote button {
+    cursor: pointer;
+    width: 23px;
+}
+
 #proposals-table .cell-content {
     display: table-cell;
     width: 100%;

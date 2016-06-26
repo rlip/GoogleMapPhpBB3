@@ -346,22 +346,85 @@ class main
     protected function _getProposalTbody($iInterestId)
     {
         global $db;
-        $sSql = 'SELECT proposal_id, proposal_text, proposal_created_at, username FROM ' . $this->_getTablePrefix() . 'inttree_proposal';
-        $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on proposal_user_id = user_id';
-        $sSql .= ' WHERE proposal_interest_id ' . (($iInterestId == 0) ? 'IS NULL' : '= ' . $iInterestId);
+        $sSubSelPlus = '(SELECT count(*) FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
+        $sSubSelPlus .= ' WHERE proposalvote_value = 1 AND proposalvote_proposal_id = proposal_id) as sum_plus';
+        $sSubSelMinus = '(SELECT count(*) FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
+        $sSubSelMinus .= ' WHERE proposalvote_value = -1 AND proposalvote_proposal_id = proposal_id) as sum_minus';
 
+        $sSql = 'SELECT proposal_id, proposal_text, proposal_created_at, username, proposalvote_value, ' . $sSubSelPlus . ', ' . $sSubSelMinus . ' FROM ' . $this->_getTablePrefix() . 'inttree_proposal';
+        $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on proposal_user_id = user_id';
+        $sSql .= ' LEFT JOIN ' . $this->_getTablePrefix() . 'inttree_proposal_vote on proposalvote_proposal_id = proposal_id';
+        $sSql .= ' WHERE proposal_interest_id ' . (($iInterestId == 0) ? 'IS NULL' : '= ' . $iInterestId);
         $oUserHasInterestSelect = $db->sql_query($sSql);
+
         $sReturn = '';
         while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
+            $sVotedClass = ($aRow['proposalvote_value'] == 1) ? 'voted-plus' : (($aRow['proposalvote_value'] == -1) ? 'voted-minus' : 'no-voted');
             $sReturn .= '<div class="row" data-proposal-id="' . $aRow['proposal_id'] . '">';
             $sReturn .= '<div class="cell-content">' . $aRow['proposal_text'] . '</div>';
             $sReturn .= '<div class="cell-user">';
             $sReturn .= '<div class="username">' . $aRow['username'] . '</div>';
             $sReturn .= '<div class="created-at">' . $aRow['proposal_created_at'] . '</div>';
-            $sReturn .= '<div class="vote">0 <button>+</button><button>-</button></div>';
+            $sReturn .= '<div class="vote ' . $sVotedClass . '">';
+            $sReturn .= '<span class="vote-plus">+' . $aRow['sum_plus'] . '</span> <span class="vote-minus">-' . $aRow['sum_minus'] . '</span>';
+            $sReturn .= ' <button onclick="intTree.onProposalVote(this, 1)">+</button> <button onclick="intTree.onProposalVote(this, 0)">-</button></div>';
             $sReturn .= '</div>';
             $sReturn .= '</div>';
         }
         return $sReturn;
+    }
+
+    protected function _isProposal($iProposalId)
+    {
+        global $db;
+
+        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_proposal WHERE proposal_id = ' . $iProposalId;
+        $oSelect = $db->sql_query($sSql);
+        $aRow = $db->sql_fetchrow($oSelect);
+        if (!$aRow) {
+            throw new Exception('Propozycja została odnaleziona');
+        }
+    }
+
+    public function proposalVote()
+    {
+        try {
+            global $db, $user;
+            $iProposalId = (int)$this->request->variable('proposal_id', 0);
+            $iIsPlus = (int)$this->request->variable('is_plus', 1);
+
+            $this->_isProposal($iProposalId);
+            $this->_isUser();
+            $iUserId = (int)$user->data['user_id'];
+            $iValue = $iIsPlus ? 1 : -1;
+
+            $sSql = 'INSERT INTO ' . $this->_getTablePrefix() . 'inttree_proposal_vote (proposalvote_user_id, proposalvote_proposal_id, proposalvote_value)';
+            $sSql .= ' VALUES (' . $iUserId . ',' . $iProposalId . ',' . $iValue . ') ON DUPLICATE KEY UPDATE proposalvote_value=' . $iValue;
+            $db->sql_query($sSql);
+
+            $sSql = 'SELECT count(*) as sum_plus FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
+            $sSql .= ' WHERE proposalvote_value = 1 AND proposalvote_proposal_id = ' . $iProposalId;
+            $oSelect = $db->sql_query($sSql);
+            $aRow = $db->sql_fetchrow($oSelect);
+            $iSumPlus = $aRow['sum_plus'];
+
+            $sSql = 'SELECT count(*) as sum_minus FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
+            $sSql .= ' WHERE proposalvote_value = -1 AND proposalvote_proposal_id = ' . $iProposalId;
+            $oSelect = $db->sql_query($sSql);
+            $aRow = $db->sql_fetchrow($oSelect);
+            $iSumMinus = $aRow['sum_minus'];
+
+            return new \Symfony\Component\HttpFoundation\JsonResponse(array(
+                'success' => true,
+                'count_plus' => $iSumPlus,
+                'count_minus' => $iSumMinus
+            ));
+
+        } catch (Exception $e) {
+            return new \Symfony\Component\HttpFoundation\JsonResponse(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
     }
 }

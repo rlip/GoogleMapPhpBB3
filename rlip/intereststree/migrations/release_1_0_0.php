@@ -71,9 +71,10 @@ class release_1_0_0 extends \phpbb\db\migration\migration
             " `proposalvote_id` INT(11) NOT NULL AUTO_INCREMENT," .
             " `proposalvote_user_id` MEDIUMINT(8) UNSIGNED NOT NULL," .
             " `proposalvote_proposal_id` INT(11) NOT NULL," .
-            " `proposalvote_value` INT(11) NULL," .
+            " `proposalvote_value` INT(11) NOT NULL," .
             " PRIMARY KEY (`proposalvote_id`)," .
             " INDEX `proposalvote_id` (`proposalvote_id`)," .
+            " UNIQUE INDEX `proposalvote_user_id_proposalvote_proposal_id` (`proposalvote_user_id`, `proposalvote_proposal_id`)," .
             " CONSTRAINT `fk_proposalvote_user_id` FOREIGN KEY (`proposalvote_user_id`) REFERENCES `" . $this->table_prefix . "users` (`user_id`) ON UPDATE CASCADE ON DELETE CASCADE," .
             " CONSTRAINT `fk_proposalvote_proposal_id` FOREIGN KEY (`proposalvote_proposal_id`) REFERENCES `" . $this->table_prefix . "inttree_proposal` (`proposal_id`) ON UPDATE CASCADE ON DELETE CASCADE" .
             " )" .

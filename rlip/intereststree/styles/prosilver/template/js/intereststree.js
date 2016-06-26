@@ -86,3 +86,32 @@ intTree.updateProposalContainer = function () {
         }
     });
 };
+
+intTree.onProposalVote = function(element, isPlus) {
+    var jElement = $(element),
+        row = jElement.parents('.row'),
+        vote = row.find('.vote');
+
+    jQuery.ajax({
+        url: '/app.php/intereststree/proposalVote',
+        dataType: 'json',
+        method: 'post',
+        data: {
+            proposal_id: row.data('proposalId'),
+            is_plus: isPlus
+        },
+        success: function (data) {
+            row.find('.vote-plus').text('+' + data.count_plus);
+            row.find('.vote-minus').text('-' + data.count_minus);
+            vote.removeClass('no-voted');
+            if(isPlus){
+                vote.removeClass('voted-minus').addClass('voted-plus');
+            } else {
+                vote.removeClass('voted-plus').addClass('voted-minus');
+            }
+        },
+        error: function (data) {
+            alert('Wystąpił nieznany błąd');
+        }
+    });
+}

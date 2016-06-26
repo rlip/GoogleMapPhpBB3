@@ -10,3 +10,6 @@ rlip_intereststree_controller_addproposal:
 rlip_intereststree_controller_getproposalcontainer:
     path: /intereststree/getProposalContainer
     defaults: { _controller: rlip.intereststree.controller:getProposalContainer }
+rlip_intereststree_controller_proposalvote:
+    path: /intereststree/proposalVote
+    defaults: { _controller: rlip.intereststree.controller:proposalVote }

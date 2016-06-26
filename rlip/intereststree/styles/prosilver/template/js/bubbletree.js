@@ -821,7 +821,7 @@ var BubbleTree = function(config, onHover, onUnHover) {
 			if (pc.length > 1) {
 				node.left = pc[(index-1+pc.length) % pc.length];
 				node.right = pc[(Number(index)+1) % pc.length];
-				if (node.right == node.left) node.right = undefined;
+		//todo!		if (node.right == node.left) node.right = undefined;
 			}
 		}
 		if (node.label !== undefined && node.label !== "") {
@@ -2105,9 +2105,10 @@ BubbleTree.Bubbles.Plain = function(node, bubblechart, origin, radius, angle, co
 
 		me.dashedBorder = me.paper.circle(cx, cy, r-3)
 			.attr({ stroke: '#ffffff', 'stroke-dasharray': "- " });
-
-
-		me.label = $('<div class="bubbletree-label '+me.node.id+'"><div class="bubbletree-amount">'+utils.formatNumber(me.node.amount)+'</div><div class="bubbletree-desc">'+me.node.shortLabel+'</div></div>');
+        if(me.node.usersCounter === undefined){
+            me.node.usersCounter = 0;
+        }
+		me.label = $('<div class="bubbletree-label '+me.node.id+'"><div class="bubbletree-desc">'+me.node.shortLabel+'</div><div class="bubbletree-users-counter">'+utils.formatNumber(me.node.usersInNodeWithChildrenCounter)+'</div></div>');
 		me.container.append(me.label);
 
 		if (me.node.children.length > 0) {

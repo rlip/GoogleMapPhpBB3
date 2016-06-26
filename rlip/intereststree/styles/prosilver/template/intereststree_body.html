@@ -1,28 +1,47 @@
 <!-- INCLUDE overall_header.html -->
 <!-- IF S_USER_LOGGED_IN -->
 <script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery.min.js"></script>
-<script type="text/javascript"
-        src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery-migrate.min.js"></script>
+<!--<script src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery.rateit.js" type="text/javascript"></script>-->
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery-migrate.min.js"></script>
 <script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/jquery.history.js"></script>
 <script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/raphael-min.js"></script>
 <script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/tween.js"></script>
 <script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/bubbletree.js"></script>
+<script type="text/javascript" src="/ext/rlip/intereststree/styles/prosilver/template/js/intereststree.js"></script>
 <link rel="stylesheet" type="text/css" href="/ext/rlip/intereststree/styles/prosilver/template/css/bubbletree.css"/>
+<link rel="stylesheet" type="text/css" href="/ext/rlip/intereststree/styles/prosilver/template/css/rateit.css"/>
 
 <script type="text/javascript">
     $(function () {
         var data = JSON.parse('{INTERESTS_DATA}');
-
-        new BubbleTree({
+        intTree.tree = new BubbleTree({
             data: data,
             autoColors: true,
             container: '.bubbletree',
-            sortBy: 'label'
+            sortBy: 'label',
+            nodeClickCallback: intTree.onNodeClick
         });
+        $.getScript("/ext/rlip/intereststree/styles/prosilver/template/js/jquery.rateit.min.js", function (data, textStatus, jqxhr) {
+            $('#rateit5')
+                    .rateit()
+                    .bind('rated', intTree.onRatedSet)
+                    .bind('reset', intTree.onRatedReset);
+        });
+        intTree.updateProposalContainer();
     });
 </script>
+
+<div id="rate-header" class="bubbletree-header">
+    Poziom zainteresowania:
+    <div class="rate-it" id="rateit5" data-rateit-step="1" data-current-node="0"></div>
+    <button id="refresh-counters-btn" onclick="window.location.reload()">Odśwież stronę</button>
+</div>
+<div id="proposal-header" class="bubbletree-header">
+    <a href="javascript:void(0)" onclick="intTree.addProposal();">Zaproponuj zmiany lub dodania</a>
+</div>
 <div class="bubbletree-wrapper">
     <div class="bubbletree"></div>
 </div>
+<div id="proposal-container"></div>
 <!-- ENDIF -->
 <!-- INCLUDE overall_footer.html -->

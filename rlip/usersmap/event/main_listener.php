@@ -58,7 +58,7 @@ class main_listener implements EventSubscriberInterface
 	public function add_page_header_link($event)
 	{
 		$this->template->assign_vars(array(
-			'RLIP_USERSMAP_PAGE_URL'	=> $this->helper->route('rlip_usersmap_controller', array('name' => 'map')),
+			'RLIP_USERSMAP_PAGE_URL'	=> $this->helper->route('rlip_usersmap_controller_map')
 		));
 	}
 }

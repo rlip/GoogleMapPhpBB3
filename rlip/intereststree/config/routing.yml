@@ -1,3 +1,12 @@
-rlip_intereststree_controller:
-    path: /intereststree/{name}
-    defaults: { _controller: rlip.intereststree.controller:handle }
+rlip_intereststree_controller_tree:
+    path: /intereststree/tree
+    defaults: { _controller: rlip.intereststree.controller:tree }
+rlip_intereststree_controller_setrate:
+    path: /intereststree/setRate
+    defaults: { _controller: rlip.intereststree.controller:setRate }
+rlip_intereststree_controller_addproposal:
+    path: /intereststree/addProposal
+    defaults: { _controller: rlip.intereststree.controller:addProposal }
+rlip_intereststree_controller_getproposalcontainer:
+    path: /intereststree/getProposalContainer
+    defaults: { _controller: rlip.intereststree.controller:getProposalContainer }

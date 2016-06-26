@@ -33,12 +33,9 @@ class main
     }
 
     /**
-     * USERSMAP controller for route /usersmap/{name}
-     *
-     * @param string $name
      * @return \Symfony\Component\HttpFoundation\Response A Symfony Response object
      */
-    public function handle($name)
+    public function map()
     {
         global $db, $config;
         $i2MonthsBefore = time() - (60 * 60 * 24 * 30 * 2);
@@ -97,6 +94,6 @@ class main
         }
         $this->template->assign_var('USERS_DATA', json_encode(array_values($aData)));
         $this->template->assign_var('JS_KEY', $config['rlip_usersmap_js_key']);
-        return $this->helper->render('map_body.html', $name);
+        return $this->helper->render('map_body.html');
     }
 }

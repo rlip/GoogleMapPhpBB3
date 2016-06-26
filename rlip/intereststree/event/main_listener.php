@@ -58,7 +58,7 @@ class main_listener implements EventSubscriberInterface
 	public function add_page_header_link($event)
 	{
 		$this->template->assign_vars(array(
-			'U_INTERESTSTREE_PAGE'	=> $this->helper->route('rlip_intereststree_controller', array('name' => 'tree')),
+			'U_INTERESTSTREE_PAGE'	=> $this->helper->route('rlip_intereststree_controller_tree')
 		));
 	}
 }

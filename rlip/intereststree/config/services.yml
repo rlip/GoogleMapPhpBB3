@@ -2,6 +2,7 @@ services:
     rlip.intereststree.controller:
         class: rlip\intereststree\controller\main
         arguments:
+            - '@request'
             - '@config'
             - '@controller.helper'
             - '@template'

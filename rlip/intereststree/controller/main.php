@@ -15,6 +15,7 @@ class main
 {
     const MAX_LEVEL = 16;
     const MAX_PROPOSAL_COUNTER = 10;
+    const SUM_TO_PROPOSAL_DELETE = -10;
 
     /* @var \phpbb\config\config */
     protected $config;
@@ -49,6 +50,7 @@ class main
     }
 
     /**
+     * Ustawia poziom zainteresowania
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @throws \phpbb\exception\http_exception
      */
@@ -85,6 +87,7 @@ class main
     }
 
     /**
+     * Czy istnieje zainteresowanie o podanym id
      * @param $iInterestId
      * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
@@ -92,7 +95,7 @@ class main
     {
         global $db;
 
-        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_interest WHERE interest_id = ' . $iInterestId;
+        $sSql = 'SELECT interest_id FROM ' . $this->_getTablePrefix() . 'inttree_interest WHERE interest_id = ' . $iInterestId;
         $oInterestSelect = $db->sql_query($sSql);
         $aInterestRow = $db->sql_fetchrow($oInterestSelect);
         if (!$aInterestRow) {
@@ -101,6 +104,21 @@ class main
     }
 
     /**
+     * Zwraca zainteresowanie o podanym id
+     * @param $iInterestId
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    protected function _getInterestById($iInterestId)
+    {
+        global $db;
+
+        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_interest WHERE interest_id = ' . $iInterestId;
+        $oInterestSelect = $db->sql_query($sSql);
+        return $db->sql_fetchrow($oInterestSelect);
+    }
+
+    /**
+     * Czy zalogowano
      * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     protected function _isUser()
@@ -110,15 +128,16 @@ class main
         if (!$iUserId) {
             throw new Exception('Dostęp tylko dla zalogowanych!');
         }
-        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'users WHERE user_id = ' . $iUserId;
-        $oInterestSelect = $db->sql_query($sSql);
-        $aInterestRow = $db->sql_fetchrow($oInterestSelect);
-        if (!$aInterestRow) {
+        $sSql = 'SELECT user_id FROM ' . $this->_getTablePrefix() . 'users WHERE user_id = ' . $iUserId;
+        $oSelect = $db->sql_query($sSql);
+        $aRow = $db->sql_fetchrow($oSelect);
+        if (!$aRow) {
             throw new Exception('Użytkownik nie został odnaleziony');
         }
     }
 
     /**
+     * Zwraca liczbę propozycji zalogowanego użytkownika
      * @throws \Symfony\Component\Config\Definition\Exception\Exception
      */
     protected function _getUserProposalCounter()
@@ -135,8 +154,7 @@ class main
     }
 
     /**
-     * Intereststree controller for route /intereststree/{name}
-     *
+     * Rysuje drzewo
      * @return \Symfony\Component\HttpFoundation\Response A Symfony Response object
      */
     public function tree()
@@ -144,7 +162,7 @@ class main
         try {
             $this->_isUser();
 
-            $aInterests = $this->_getInterestsData();
+            $aInterests = $this->_getInterestsWithRate();
             $aAllUsersData = $this->_getAllUserInterestsData();
 
             $aTree = array(
@@ -161,13 +179,14 @@ class main
             $this->_getUsersCounter($aTree);
 
             $this->template->assign_var('INTERESTS_DATA', json_encode($aTree));
-            return $this->helper->render('intereststree_body.html', 'Drzewo zainteresowań');
+            return $this->helper->render('intereststree.html', 'Drzewo zainteresowań');
         } catch (Exception $e) {
             throw new \phpbb\exception\http_exception(500, 'GENERAL_ERROR');
         }
     }
 
     /**
+     * Zwraca tablicę id użytkowników mających zainteresowanie w danym nodzie
      * @param array $aTree
      */
     protected function _getUsersCounter(array &$aTree)
@@ -189,6 +208,7 @@ class main
     }
 
     /**
+     * Zwraca zainteresowania zalogowanego użytkownika
      * @return array
      */
     protected function _getCurrentUserInterestsData()
@@ -205,6 +225,7 @@ class main
     }
 
     /**
+     * Zwraca zainteresowania wszystkich użytkowników
      * @return array
      */
     protected function _getAllUserInterestsData()
@@ -223,6 +244,7 @@ class main
     }
 
     /**
+     * Zwraca prefix tabel
      * @return string
      */
     protected function _getTablePrefix()
@@ -231,9 +253,10 @@ class main
     }
 
     /**
+     * Zwraca dane zainteresowań
      * @return array
      */
-    protected function _getInterestsData()
+    protected function _getInterestsWithRate()
     {
         global $db;
 
@@ -241,20 +264,21 @@ class main
 
         $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_interest';
         $oInterests = $db->sql_query($sSql);
-        $aInterests = array();
+        $aInterestsData = array();
 
         while ($aRow = $db->sql_fetchrow($oInterests)) {
             $iParentId = (int)$aRow['interest_parent_id'];
-            if (!isset($aInterests[$iParentId])) {
-                $aInterests[$iParentId] = array();
+            if (!isset($aInterestsData[$iParentId])) {
+                $aInterestsData[$iParentId] = array();
             }
             $aRow['rate'] = isset($aCurrentUserInterests[$aRow['interest_id']]) ? $aCurrentUserInterests[$aRow['interest_id']] : 0;
-            $aInterests[$iParentId][] = $aRow;
+            $aInterestsData[$iParentId][] = $aRow;
         }
-        return $aInterests;
+        return $aInterestsData;
     }
 
     /**
+     * Tworzy drzewo zainteresowań
      * @param array $aResult
      * @param $iParentId
      * @param $iLevel
@@ -285,12 +309,16 @@ class main
         return $aCurrentData;
     }
 
+    /**
+     * Dodaje propozycję zmian
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function addProposal()
     {
         try {
             global $db, $user;
             $iInterestId = (int)$this->request->variable('id', 0);
-            $sProposal = trim($this->request->variable('proposal', ''));
+            $sProposal = $this->request->variable('proposal', '', true);
 
             $this->_isUser();
             if ($iInterestId != 0) {
@@ -325,6 +353,11 @@ class main
         }
     }
 
+    /**
+     * Zwraca html propozycji zmian
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \phpbb\exception\http_exception
+     */
     public function getProposalContainer()
     {
         try {
@@ -332,8 +365,7 @@ class main
             if ($iInterestId != 0) {
                 $this->_isInterest($iInterestId);
             }
-
-            $this->template->assign_var('PROPOSAL_ROWS', $this->_getProposalTbody($iInterestId));
+            $this->template->assign_var('PROPOSAL_ROWS', $this->_getProposalRows($iInterestId));
             return $this->helper->render('proposals.html');
         } catch (Exception $e) {
             throw new \phpbb\exception\http_exception(500, 'GENERAL_ERROR');
@@ -341,29 +373,93 @@ class main
     }
 
     /**
+     * Zwraca html listy użytkowników
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \phpbb\exception\http_exception
+     */
+    public function getUserContainer()
+    {
+        try {
+            $iInterestId = (int)$this->request->variable('id', 0);
+            $this->template->assign_var('USER_ROWS', $this->_getUserRows($iInterestId));
+            return $this->helper->render('users.html');
+        } catch (Exception $e) {
+            throw new \phpbb\exception\http_exception(500, 'GENERAL_ERROR');
+        }
+    }
+
+    /**
+     * Zwraca zainteresowania w postaciach do szukania rodziców i do szukania dzieci
      * @return array
      */
-    protected function _getProposalTbody($iInterestId)
+    protected function _getInterestsBoth()
     {
         global $db;
+        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_interest';
+        $oInterests = $db->sql_query($sSql);
+        $aInterestsForUp = array();
+        $aInterestsForDown = array();
+        while ($aRow = $db->sql_fetchrow($oInterests)) {
+            $aInterestsForUp[$aRow['interest_id']] = $aRow;
+            $iParentId = (int)$aRow['interest_parent_id'];
+            if (!isset($aInterestsForDown[$iParentId])) {
+                $aInterestsForDown[$iParentId] = array();
+            }
+            $aInterestsForDown[$iParentId][] = $aRow;
+        }
+        return array($aInterestsForUp, $aInterestsForDown);
+    }
+
+    /**
+     * Zwraca wszystkie idiki dzieci $iInterestId oraz $iInterestId
+     * @param $iInterestId
+     * @param $aInterestsForDown
+     */
+    protected function _getInterestChildrenIds($iInterestId, &$aInterestsForDown)
+    {
+        $aReturn = array($iInterestId);
+        if (isset($aInterestsForDown[$iInterestId])) {
+            foreach ($aInterestsForDown[$iInterestId] as $aChild) {
+                $aChildData = $this->_getInterestChildrenIds($aChild['interest_id'], $aInterestsForDown);
+                $aReturn = array_merge($aReturn, $aChildData);
+            }
+        }
+        return $aReturn;
+    }
+
+    /**
+     * Zwraca html propozycji
+     * @return array
+     */
+    protected function _getProposalRows($iInterestId)
+    {
+        global $db;
+        list($aInterestsForUp, $aInterestsForDown) = $this->_getInterestsBoth();
+
         $sSubSelPlus = '(SELECT count(*) FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
         $sSubSelPlus .= ' WHERE proposalvote_value = 1 AND proposalvote_proposal_id = proposal_id) as sum_plus';
         $sSubSelMinus = '(SELECT count(*) FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
         $sSubSelMinus .= ' WHERE proposalvote_value = -1 AND proposalvote_proposal_id = proposal_id) as sum_minus';
 
-        $sSql = 'SELECT proposal_id, proposal_text, proposal_created_at, username, proposalvote_value, ' . $sSubSelPlus . ', ' . $sSubSelMinus . ' FROM ' . $this->_getTablePrefix() . 'inttree_proposal';
+        $sSql = 'SELECT proposal_id, proposal_interest_id, proposal_text, proposal_created_at, username, proposalvote_value, proposal_interest_id,' . $sSubSelPlus . ', ' . $sSubSelMinus . ' FROM ' . $this->_getTablePrefix() . 'inttree_proposal';
         $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on proposal_user_id = user_id';
-        $sSql .= ' LEFT JOIN ' . $this->_getTablePrefix() . 'inttree_proposal_vote on proposalvote_proposal_id = proposal_id';
-        $sSql .= ' WHERE proposal_interest_id ' . (($iInterestId == 0) ? 'IS NULL' : '= ' . $iInterestId);
+        $sSql .= ' LEFT JOIN ' . $this->_getTablePrefix() . 'inttree_proposal_vote on proposalvote_proposal_id = proposal_id AND proposalvote_user_id = user_id';
+        if ($iInterestId) {
+            $aInterestsChildrenIds = $this->_getInterestChildrenIds($iInterestId, $aInterestsForDown);
+            $sSql .= ' WHERE proposal_interest_id IN (' . implode(',', $aInterestsChildrenIds) . ')';
+        }
         $oUserHasInterestSelect = $db->sql_query($sSql);
 
         $sReturn = '';
         while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
             $sVotedClass = ($aRow['proposalvote_value'] == 1) ? 'voted-plus' : (($aRow['proposalvote_value'] == -1) ? 'voted-minus' : 'no-voted');
             $sReturn .= '<div class="row" data-proposal-id="' . $aRow['proposal_id'] . '">';
-            $sReturn .= '<div class="cell-content">' . $aRow['proposal_text'] . '</div>';
+            $sReturn .= '<div class="cell-content">';
+            $sReturn .= '<div class="interest-path">' . $this->_getInterestPatch($aRow['proposal_interest_id'], $aInterestsForUp) . '</div>';
+            $sReturn .= '<div class="proposal-text">' . $aRow['proposal_text'] . '</div>';
+            $sReturn .= '</div>';
             $sReturn .= '<div class="cell-user">';
-            $sReturn .= '<div class="username">' . $aRow['username'] . '</div>';
+            $sReturn .= '<div class="username"><a href="/memberlist.php?mode=viewprofile&un=' . $aRow['username'] . '">' . $aRow['username'] . '</a></div>';
             $sReturn .= '<div class="created-at">' . $aRow['proposal_created_at'] . '</div>';
             $sReturn .= '<div class="vote ' . $sVotedClass . '">';
             $sReturn .= '<span class="vote-plus">+' . $aRow['sum_plus'] . '</span> <span class="vote-minus">-' . $aRow['sum_minus'] . '</span>';
@@ -374,11 +470,76 @@ class main
         return $sReturn;
     }
 
+
+    /**
+     * Zwraca html użytkowników
+     * @return array
+     */
+    protected function _getUserRows($iInterestId)
+    {
+        global $db;
+        $aInterest = $this->_getInterestById($iInterestId);
+        if (!$aInterest || !$aInterest['interest_selection_allowed']) {
+            return false;
+        }
+        list($aInterestsForUp, $aInterestsForDown) = $this->_getInterestsBoth();
+        $iInterestChildrenIds = $this->_getInterestChildrenIds($iInterestId, $aInterestsForDown);
+
+        $sSql = 'SELECT userhasinterest_user_id, userhasinterest_interest_id, userhasinterest_rate, username,';
+        $sSql .= ' (userhasinterest_rate / (SELECT SUM(userhasinterest_rate) FROM phpbb_inttree_user_has_interest inner_tab WHERE inner_tab.userhasinterest_user_id = outer_tab.userhasinterest_user_id) * 100) AS percent';
+        $sSql .= ' FROM ' . $this->_getTablePrefix() . 'inttree_user_has_interest outer_tab';
+        $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on userhasinterest_user_id = user_id';
+        $sSql .= ' WHERE userhasinterest_interest_id IN(' . implode(',', $iInterestChildrenIds) . ')';
+        $sSql .= ' ORDER BY percent DESC';
+        $oUserHasInterestSelect = $db->sql_query($sSql);
+
+        $sReturn = '';
+        while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
+            $iPercent = round($aRow['percent']);
+            $sReturn .= '<div class="row">';
+            $sReturn .= '<div class="percent-vote"><div class="c100 p'.$iPercent.' micro orange"><span>'.$iPercent.'%</span><div class="slice"><div class="bar"></div><div class="fill"></div></div></div></div>';
+            $sReturn .= '<div class="username"><a href="/memberlist.php?mode=viewprofile&un=' . $aRow['username']. '">' . $aRow['username'] . '</a></div>';
+            $sReturn .= '<div class="star"><div class="rateit" data-rateit-value="' . $aRow['userhasinterest_rate'] . '" data-rateit-ispreset="true" data-rateit-readonly="true"></div></div>';
+            $sReturn .= '<div class="interest-path">' . $this->_getInterestPatch($aRow['userhasinterest_interest_id'], $aInterestsForUp, $iInterestId) . '</div>';
+            $sReturn .= '</div>';
+        }
+        return $sReturn;
+    }
+
+    /**
+     * Zwraca ścieżkę zainteresowania
+     * @param $iInterestId
+     * @param $aInterests
+     * @param int $iInterestIdFrom
+     * @return string
+     */
+    protected function _getInterestPatch($iInterestId, $aInterests, $iInterestIdMaxUp = 0)
+    {
+        $aReturn = array();
+        $iCurrentInterestId = $iInterestId;
+        while ($iCurrentInterestId AND isset($aInterests[$iCurrentInterestId])) {
+            $aReturn[] = $aInterests[$iCurrentInterestId]['interest_title'];
+            if($iCurrentInterestId == $iInterestIdMaxUp){
+                break;
+            }
+            $iCurrentInterestId = $aInterests[$iCurrentInterestId]['interest_parent_id'];
+        }
+        if ($iInterestIdMaxUp == 0) {
+            $aReturn[] = 'Drzewo zainteresowań';
+        }
+        return implode(' -> ', array_reverse($aReturn));
+    }
+
+    /**
+     * Czy propozycja jest w bazie
+     * @param $iProposalId
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
     protected function _isProposal($iProposalId)
     {
         global $db;
 
-        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_proposal WHERE proposal_id = ' . $iProposalId;
+        $sSql = 'SELECT proposal_id FROM ' . $this->_getTablePrefix() . 'inttree_proposal WHERE proposal_id = ' . $iProposalId;
         $oSelect = $db->sql_query($sSql);
         $aRow = $db->sql_fetchrow($oSelect);
         if (!$aRow) {
@@ -386,6 +547,10 @@ class main
         }
     }
 
+    /**
+     * Oddanie głosu na propozycję
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function proposalVote()
     {
         try {
@@ -414,11 +579,21 @@ class main
             $aRow = $db->sql_fetchrow($oSelect);
             $iSumMinus = $aRow['sum_minus'];
 
-            return new \Symfony\Component\HttpFoundation\JsonResponse(array(
-                'success' => true,
-                'count_plus' => $iSumPlus,
-                'count_minus' => $iSumMinus
-            ));
+            if ($iSumPlus - $iSumMinus <= self::SUM_TO_PROPOSAL_DELETE) {
+                $sSql = 'DELETE FROM ' . $this->_getTablePrefix() . 'inttree_proposal where proposal_id = ' . $iProposalId;
+                $db->sql_query($sSql);
+                return new \Symfony\Component\HttpFoundation\JsonResponse(array(
+                    'success' => true,
+                    'is_deleted' => true,
+                ));
+            } else {
+                return new \Symfony\Component\HttpFoundation\JsonResponse(array(
+                    'success' => true,
+                    'is_deleted' => false,
+                    'count_plus' => $iSumPlus,
+                    'count_minus' => $iSumMinus
+                ));
+            }
 
         } catch (Exception $e) {
             return new \Symfony\Component\HttpFoundation\JsonResponse(array(

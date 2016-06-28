@@ -1,6 +1,32 @@
+/*************** bubbletree-header ***********/
 .bubbletree-header {
     position: absolute;
     z-index: 1;
+}
+.rateit {
+    position: relative;
+    cursor: pointer;
+}
+
+.rateit button {
+    cursor: pointer;
+}
+
+#refresh-counters-btn {
+    display: none;
+}
+
+/*************** bubble-tree-table ***********/
+
+.bubble-tree-table .table-body-list .row {
+    padding: 10px 15px;
+    font-size: 12px;
+    border-bottom: 1px dotted #00608f;
+}
+
+.bubble-tree-table .table-body-list {
+    background-color: #eef5f9;
+    position: relative;
 }
 
 #rate-header {
@@ -12,16 +38,16 @@
     cursor: pointer;
 }
 
-.bubble-tree-table .table-body-list .row {
-    padding: 15px;
-    font-size: 12px;
-    display: table;
-    border-bottom: 1px dotted #00608f;
+/*************** proposals-table ***********/
+
+#proposals-table .interest-path{
+    margin-bottom: 10px;
+    color: #0076b1;
+    font-size: 11px;
 }
 
-.bubble-tree-table .table-body-list {
-    background-color: #eef5f9;
-    position: relative;
+#proposals-table .table-body-list .row {
+    display: table;
 }
 
 #proposals-table .vote span{
@@ -61,19 +87,31 @@
     display: block;
     text-align: right;
 }
-
-.rateit {
-    position: relative;
-    cursor: pointer;
+/*************** users-table ***********/
+#users-table .table-body-list > .row > div {
+    display: inline-block;
+    vertical-align: top;
 }
 
-.rateit button {
-    cursor: pointer;
+#users-table .table-body-list > .row > .percent-vote {
+    width: 150px;
+}
+#users-table .table-body-list > .row > .username {
+    width: 200px;
 }
 
-#refresh-counters-btn {
-    display: none;
+#users-table .table-body-list > .row > .star {
+    width: 150px;
 }
+
+#users-table .table-body-list > .row > .interest-path {
+    float: right;
+    text-align: right;
+    color: #0076b1;
+    font-size: 11px;
+}
+
+/*************** bubbletree-wrapper ***********/
 
 .bubbletree-wrapper {
     width: 100%;
@@ -125,3 +163,5 @@
     width: 700px;
     height: 400px;
 }
+
+/*************** pie ***********/

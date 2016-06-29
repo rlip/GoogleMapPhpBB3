@@ -32,6 +32,9 @@ class main
     /* @var \phpbb\request */
     protected $request;
 
+    /* @var \phpbb\notification\manager */
+    protected $notification_manager;
+
     /**
      * Constructor
      *
@@ -40,13 +43,14 @@ class main
      * @param \phpbb\template\template $template
      * @param \phpbb\user $user
      */
-    public function __construct(\phpbb\request\request $request, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user)
+    public function __construct(\phpbb\request\request $request, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user, \phpbb\notification\manager $notification_manager)
     {
         $this->config = $config;
         $this->helper = $helper;
         $this->template = $template;
         $this->user = $user;
         $this->request = $request;
+        $this->notification_manager = $notification_manager;
     }
 
     /**
@@ -562,7 +566,6 @@ class main
             $this->_isUser();
             $iUserId = (int)$user->data['user_id'];
             $iValue = $iIsPlus ? 1 : -1;
-
             $sSql = 'INSERT INTO ' . $this->_getTablePrefix() . 'inttree_proposal_vote (proposalvote_user_id, proposalvote_proposal_id, proposalvote_value)';
             $sSql .= ' VALUES (' . $iUserId . ',' . $iProposalId . ',' . $iValue . ') ON DUPLICATE KEY UPDATE proposalvote_value=' . $iValue;
             $db->sql_query($sSql);
@@ -580,8 +583,14 @@ class main
             $iSumMinus = $aRow['sum_minus'];
 
             if ($iSumPlus - $iSumMinus <= self::SUM_TO_PROPOSAL_DELETE) {
+                $sSql = 'SELECT proposal_user_id FROM ' . $this->_getTablePrefix() . 'inttree_proposal';
+                $sSql .= ' WHERE proposal_id = ' . $iProposalId;
+                $oSelect = $db->sql_query($sSql);
+                $aRow = $db->sql_fetchrow($oSelect);
+
                 $sSql = 'DELETE FROM ' . $this->_getTablePrefix() . 'inttree_proposal where proposal_id = ' . $iProposalId;
                 $db->sql_query($sSql);
+                $this->_addRejectedNotification($aRow['proposal_user_id']);
                 return new \Symfony\Component\HttpFoundation\JsonResponse(array(
                     'success' => true,
                     'is_deleted' => true,
@@ -601,5 +610,36 @@ class main
                 'message' => $e->getMessage()
             ));
         }
+    }
+
+    /**
+     * Dodaje notyfikacje o odrzuceniu propozycji
+     * @param $iToUserId
+     */
+    protected function _addRejectedNotification($iToUserId){
+        $aNotificationData = array(
+            'user_id'   => (int) $this->user->data['user_id'],
+            'to_user_id'   => $iToUserId,
+            'time'   => time(),
+            'username'   => $this->user->data['username'],
+        );
+        $this->notification_manager->add_notifications(array(
+            'rlip.intereststree.notification.type.inttree_proposal_rejected',
+        ), $aNotificationData);
+    }
+    /**
+     * Dodaje notyfikacje o akceptacji propozycji
+     * @param $iToUserId
+     */
+    protected function _addAcceptedNotification($iToUserId){
+        $aNotificationData = array(
+            'user_id'   => (int) $this->user->data['user_id'],
+            'to_user_id'   => $iToUserId,
+            'time'   => time(),
+            'username'   => $this->user->data['username'],
+        );
+        $this->notification_manager->add_notifications(array(
+            'rlip.intereststree.notification.type.inttree_proposal_accepted',
+        ), $aNotificationData);
     }
 }

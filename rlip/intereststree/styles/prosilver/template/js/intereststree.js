@@ -127,8 +127,9 @@ intTree.onProposalVote = function (element, isPlus) {
         },
         success: function (data) {
             if (data.is_deleted) {
+                alert('Propozycja została odrzucona');
                 row.remove();
-                if (!table.find('.row').lenght) {
+                if (!table.find('.row').length) {
                     table.remove();
                 }
             } else {

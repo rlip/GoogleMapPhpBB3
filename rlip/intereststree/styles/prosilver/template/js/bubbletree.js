@@ -821,7 +821,7 @@ var BubbleTree = function(config, onHover, onUnHover) {
 			if (pc.length > 1) {
 				node.left = pc[(index-1+pc.length) % pc.length];
 				node.right = pc[(Number(index)+1) % pc.length];
-		//todo!		if (node.right == node.left) node.right = undefined;
+		//	if (node.right == node.left) node.right = undefined;
 			}
 		}
 		if (node.label !== undefined && node.label !== "") {

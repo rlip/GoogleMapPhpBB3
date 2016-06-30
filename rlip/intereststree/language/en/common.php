@@ -12,5 +12,6 @@ $lang = array_merge($lang, array(
     'RLIP_INTERESTS_TREE_NAVI_NAME' => 'Drzewo zainteresowań',
     'RLIP_INTERESTS_TREE_PROPOSAL_NOTIFICATION_ACCEPTED_TEXT' => 'Twoja propozycja została zaakceptowana',
     'RLIP_INTERESTS_TREE_PROPOSAL_NOTIFICATION_REJECTED_TEXT' => 'Twoja propozycja została odrzucona',
-    'RLIP_INTERESTS_TREE_PROPOSAL_NOTIFICATION_TITLE' => 'Drzewo zainteresowań'
+    'RLIP_INTERESTS_TREE_PROPOSAL_NOTIFICATION_TITLE' => 'Drzewo zainteresowań',
+    'RLIP_INTERESTS_TREE_PROPOSAL_ACL_MANAGE' => 'Zarządzanie propozycjami zmian w drzewie zainteresowań',
 ));

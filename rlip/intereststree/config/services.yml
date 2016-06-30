@@ -11,8 +11,13 @@ services:
     rlip.intereststree.listener:
         class: rlip\intereststree\event\main_listener
         arguments:
-            - '@controller.helper'
-            - '@template'
+            - @controller.helper
+            - @template
+            - @dbal.conn
+            - @user
+            - %core.root_path%
+            - %core.php_ext%
+            - @auth
         tags:
             - { name: event.listener }
     rlip.intereststree.notification.type.inttree_proposal_accepted:

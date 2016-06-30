@@ -437,7 +437,8 @@ class main
      */
     protected function _getProposalRows($iInterestId)
     {
-        global $db;
+        global $db, $auth;
+
         list($aInterestsForUp, $aInterestsForDown) = $this->_getInterestsBoth();
 
         $sSubSelPlus = '(SELECT count(*) FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
@@ -455,11 +456,15 @@ class main
         $oUserHasInterestSelect = $db->sql_query($sSql);
 
         $sReturn = '';
+        $sManageButtons = '';
         while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
+            if($auth->acl_get('m_inttree')){
+                $sManageButtons = '<button onclick="alert(\'Wkrótce\')">Odrzuć</button><button onclick="alert(\'Wkrótce\')">Zatwierdź</button> ';
+            }
             $sVotedClass = ($aRow['proposalvote_value'] == 1) ? 'voted-plus' : (($aRow['proposalvote_value'] == -1) ? 'voted-minus' : 'no-voted');
             $sReturn .= '<div class="row" data-proposal-id="' . $aRow['proposal_id'] . '">';
             $sReturn .= '<div class="cell-content">';
-            $sReturn .= '<div class="interest-path">' . $this->_getInterestPatch($aRow['proposal_interest_id'], $aInterestsForUp) . '</div>';
+            $sReturn .= '<div class="interest-path">' .$sManageButtons . $this->_getInterestPatch($aRow['proposal_interest_id'], $aInterestsForUp) . '</div>';
             $sReturn .= '<div class="proposal-text">' . $aRow['proposal_text'] . '</div>';
             $sReturn .= '</div>';
             $sReturn .= '<div class="cell-user">';

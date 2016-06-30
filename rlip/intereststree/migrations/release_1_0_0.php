@@ -14,10 +14,26 @@ class release_1_0_0 extends \phpbb\db\migration\migration
         return array('\phpbb\db\migration\data\v310\alpha2');
     }
 
+    public function update_schema()
+    {
+        return array(
+
+        );
+    }
+
     public function update_data()
     {
         return array(
-            array('custom', array(array($this, 'create_tables')))
+            array('custom', array(array($this, 'create_tables'))),
+            array('permission.add', array('m_inttree', true)),
+            array('permission.permission_set', array('ROLE_MOD_FULL', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_MOD_QUEUE', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_MOD_SIMPLE', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_MOD_STANDARD', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_ADMIN_FORUM', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_ADMIN_FULL', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_ADMIN_STANDARD', 'm_inttree', 'rule', true)),
+            array('permission.permission_set', array('ROLE_ADMIN_USERGROUP', 'm_inttree', 'rule', true)),
         );
     }
 
@@ -321,9 +337,9 @@ class release_1_0_0 extends \phpbb\db\migration\migration
         return array(
             'drop_tables' => array(
                 $this->table_prefix . 'inttree_user_has_interest',
+                $this->table_prefix . 'inttree_proposal_vote',
                 $this->table_prefix . 'inttree_proposal',
                 $this->table_prefix . 'inttree_interest',
-                $this->table_prefix . 'inttree_proposal_vote',
             ),
         );
     }

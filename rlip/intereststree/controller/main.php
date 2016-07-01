@@ -339,7 +339,7 @@ class main
                 throw new Exception('Dopóki nie zostaną rozpatrzone Twoje poprzednie propozycje nie możesz składać nowych :)');
             }
             $iUserId = (int)$user->data['user_id'];
-            $sProposal = mysql_real_escape_string(strip_tags($sProposal));
+            $sProposal = $db->sql_escape(strip_tags($sProposal));
             $sSql = 'INSERT INTO ' . $this->_getTablePrefix() . 'inttree_proposal (proposal_user_id, proposal_interest_id, proposal_text, proposal_created_at)';
             $sSql .= ' VALUES (' . $iUserId . ',' . $iInterestId . ',"' . $sProposal . '", "' . date('Y-m-d H:i:s', time()) . '")';
             $db->sql_query($sSql);
@@ -460,7 +460,7 @@ class main
         $sManageButtons = '';
         while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
             if($auth->acl_get('m_inttree')){
-                $sManageButtons = '<button onclick="alert(\'Wkrótce\')">Odrzuć</button><button onclick="alert(\'Wkrótce\')">Zatwierdź</button> ';
+                $sManageButtons = '<div class="proposal-mod-action proposal-accept"></div><div class="proposal-mod-action proposal-reject"></div>';
             }
             $sVotedClass = ($aRow['proposalvote_value'] == 1) ? 'voted-plus' : (($aRow['proposalvote_value'] == -1) ? 'voted-minus' : 'no-voted');
             $sReturn .= '<div class="row" data-proposal-id="' . $aRow['proposal_id'] . '">';

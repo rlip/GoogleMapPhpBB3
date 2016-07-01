@@ -3,6 +3,7 @@
     position: absolute;
     z-index: 1;
 }
+
 .rateit {
     position: relative;
     cursor: pointer;
@@ -40,7 +41,7 @@
 
 /*************** proposals-table ***********/
 
-#proposals-table .interest-path{
+#proposals-table .interest-path {
     margin-bottom: 10px;
     color: #0076b1;
     font-size: 11px;
@@ -50,24 +51,26 @@
     display: table;
 }
 
-#proposals-table .vote span{
+#proposals-table .vote span {
     padding: 2px;
     font-weight: bold;
     font-size: 12px;
 }
 
-#proposals-table .vote.no-voted .vote-plus{
+#proposals-table .vote.no-voted .vote-plus {
     color: #3b915f;
 }
-#proposals-table .vote.no-voted .vote-minus{
+
+#proposals-table .vote.no-voted .vote-minus {
     color: #c0392b;
 }
 
-#proposals-table .vote.voted-plus .vote-plus{
+#proposals-table .vote.voted-plus .vote-plus {
     background-color: #3b915f;
     color: #fff;
 }
-#proposals-table .vote.voted-minus .vote-minus{
+
+#proposals-table .vote.voted-minus .vote-minus {
     background-color: #c0392b;
     color: #fff;
 }
@@ -87,6 +90,22 @@
     display: block;
     text-align: right;
 }
+
+#proposals-table .proposal-accept {
+    background-image: url('icons/accept.png');
+}
+
+#proposals-table .proposal-reject {
+    background-image: url('icons/reject.png');
+}
+
+#proposals-table .proposal-mod-action {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 5px;
+}
+
 /*************** users-table ***********/
 #users-table .table-body-list > .row > div {
     display: inline-block;
@@ -96,6 +115,7 @@
 #users-table .table-body-list > .row > .percent-vote {
     width: 150px;
 }
+
 #users-table .table-body-list > .row > .username {
     width: 200px;
 }

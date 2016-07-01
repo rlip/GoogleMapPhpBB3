@@ -365,6 +365,7 @@ class main
     public function getProposalContainer()
     {
         try {
+            $this->_isUser();
             $iInterestId = (int)$this->request->variable('id', 0);
             if ($iInterestId != 0) {
                 $this->_isInterest($iInterestId);
@@ -437,8 +438,8 @@ class main
      */
     protected function _getProposalRows($iInterestId)
     {
-        global $db, $auth;
-
+        global $db, $auth, $user;
+        $iUserId = (int)$user->data['user_id'];
         list($aInterestsForUp, $aInterestsForDown) = $this->_getInterestsBoth();
 
         $sSubSelPlus = '(SELECT count(*) FROM ' . $this->_getTablePrefix() . 'inttree_proposal_vote ';
@@ -448,7 +449,7 @@ class main
 
         $sSql = 'SELECT proposal_id, proposal_interest_id, proposal_text, proposal_created_at, username, proposalvote_value, proposal_interest_id,' . $sSubSelPlus . ', ' . $sSubSelMinus . ' FROM ' . $this->_getTablePrefix() . 'inttree_proposal';
         $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on proposal_user_id = user_id';
-        $sSql .= ' LEFT JOIN ' . $this->_getTablePrefix() . 'inttree_proposal_vote on proposalvote_proposal_id = proposal_id AND proposalvote_user_id = user_id';
+        $sSql .= ' LEFT JOIN ' . $this->_getTablePrefix() . 'inttree_proposal_vote on proposalvote_proposal_id = proposal_id AND proposalvote_user_id = ' . $iUserId;
         if ($iInterestId) {
             $aInterestsChildrenIds = $this->_getInterestChildrenIds($iInterestId, $aInterestsForDown);
             $sSql .= ' WHERE proposal_interest_id IN (' . implode(',', $aInterestsChildrenIds) . ')';

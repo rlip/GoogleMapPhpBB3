@@ -104,6 +104,7 @@
     height: 16px;
     display: inline-block;
     margin-right: 5px;
+    cursor: pointer;
 }
 
 /*************** users-table ***********/

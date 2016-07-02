@@ -17,3 +17,6 @@ rlip_intereststree_controller_getusercontainer:
 rlip_intereststree_controller_proposalvote:
     path: /intereststree/proposalVote
     defaults: { _controller: rlip.intereststree.controller:proposalVote }
+rlip_intereststree_controller_proposalmanage:
+    path: /intereststree/proposalManage
+    defaults: { _controller: rlip.intereststree.controller:proposalManage }

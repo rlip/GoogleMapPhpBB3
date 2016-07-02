@@ -90,7 +90,7 @@ intTree.updateProposalContainer = function () {
 };
 
 intTree.updateUserContainer = function () {
-    if(!intTree.currentNode.selectionAllowed){
+    if (!intTree.currentNode.selectionAllowed) {
         $('#user-container').html('');
         return;
     }
@@ -142,6 +142,47 @@ intTree.onProposalVote = function (element, isPlus) {
                     vote.removeClass('voted-plus').addClass('voted-minus');
                 }
             }
+        },
+        error: function (data) {
+            alert('Wystąpił nieznany błąd');
+        }
+    });
+}
+
+intTree.onProposalAccept = function (element) {
+    if(!confirm('Czy na pewno chcesz ZAAKCEPTOWAĆ propozycję?')){
+        return;
+    }
+    intTree.onProposalManage(element, true);
+}
+intTree.onProposalReject = function (element) {
+    if(!confirm('Czy na pewno chcesz ODRZUCIĆ propozycję?')){
+        return;
+    }
+    intTree.onProposalManage(element, false);
+}
+
+intTree.onProposalManage = function (element, isAccept) {
+    var jElement = $(element),
+        row = jElement.parents('.row'),
+        vote = row.find('.vote'),
+        table = $('#proposals-table');
+
+    jQuery.ajax({
+        url: '/app.php/intereststree/proposalManage',
+        dataType: 'json',
+        method: 'post',
+        data: {
+            proposal_id: row.data('proposalId'),
+            is_accept: isAccept
+        },
+        success: function (data) {
+            if (isAccept) {
+                alert('Propozycja została zaakceptowana');
+            } else {
+                alert('Propozycja została odrzucona');
+            }
+            intTree.updateProposalContainer();
         },
         error: function (data) {
             alert('Wystąpił nieznany błąd');

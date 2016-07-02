@@ -38,10 +38,12 @@ class main
     /**
      * Constructor
      *
+     * @param \phpbb\request\request $request
      * @param \phpbb\config\config $config
      * @param \phpbb\controller\helper $helper
      * @param \phpbb\template\template $template
      * @param \phpbb\user $user
+     * @param \phpbb\notification\manager $notification_manager
      */
     public function __construct(\phpbb\request\request $request, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user, \phpbb\notification\manager $notification_manager)
     {
@@ -159,6 +161,7 @@ class main
 
     /**
      * Rysuje drzewo
+     * @throws \phpbb\exception\http_exception
      * @return \Symfony\Component\HttpFoundation\Response A Symfony Response object
      */
     public function tree()
@@ -192,6 +195,7 @@ class main
     /**
      * Zwraca tablicę id użytkowników mających zainteresowanie w danym nodzie
      * @param array $aTree
+     * @return array
      */
     protected function _getUsersCounter(array &$aTree)
     {
@@ -419,6 +423,7 @@ class main
      * Zwraca wszystkie idiki dzieci $iInterestId oraz $iInterestId
      * @param $iInterestId
      * @param $aInterestsForDown
+     * @return array
      */
     protected function _getInterestChildrenIds($iInterestId, &$aInterestsForDown)
     {
@@ -434,11 +439,12 @@ class main
 
     /**
      * Zwraca html propozycji
+     * @param $iInterestId
      * @return array
      */
     protected function _getProposalRows($iInterestId)
     {
-        global $db, $auth, $user;
+        global $db, $user;
         $iUserId = (int)$user->data['user_id'];
         list($aInterestsForUp, $aInterestsForDown) = $this->_getInterestsBoth();
 
@@ -459,8 +465,9 @@ class main
         $sReturn = '';
         $sManageButtons = '';
         while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
-            if($auth->acl_get('m_inttree')){
-                $sManageButtons = '<div class="proposal-mod-action proposal-accept"></div><div class="proposal-mod-action proposal-reject"></div>';
+            if($this->_hasModPermission()){
+                $sManageButtons = '<div class="proposal-mod-action proposal-accept" onclick="intTree.onProposalAccept(this)"></div>';
+                $sManageButtons .= '<div class="proposal-mod-action proposal-reject" onclick="intTree.onProposalReject(this)"></div>';
             }
             $sVotedClass = ($aRow['proposalvote_value'] == 1) ? 'voted-plus' : (($aRow['proposalvote_value'] == -1) ? 'voted-minus' : 'no-voted');
             $sReturn .= '<div class="row" data-proposal-id="' . $aRow['proposal_id'] . '">';
@@ -480,9 +487,17 @@ class main
         return $sReturn;
     }
 
+    /**
+     * Czy ma uprawnienia do modyfikacji drzewa i akceptowania propozycji
+     */
+    protected function _hasModPermission(){
+        global $auth;
+        return $auth->acl_get('m_inttree');
+    }
 
     /**
      * Zwraca html użytkowników
+     * @param $iInterestId
      * @return array
      */
     protected function _getUserRows($iInterestId)
@@ -520,7 +535,7 @@ class main
      * Zwraca ścieżkę zainteresowania
      * @param $iInterestId
      * @param $aInterests
-     * @param int $iInterestIdFrom
+     * @param int $iInterestIdMaxUp
      * @return string
      */
     protected function _getInterestPatch($iInterestId, $aInterests, $iInterestIdMaxUp = 0)
@@ -555,6 +570,21 @@ class main
         if (!$aRow) {
             throw new Exception('Propozycja została odnaleziona');
         }
+    }
+
+
+    /**
+     * Czy propozycja jest w bazie
+     * @param $iProposalId
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     */
+    protected function _getProposalById($iProposalId)
+    {
+        global $db;
+
+        $sSql = 'SELECT * FROM ' . $this->_getTablePrefix() . 'inttree_proposal WHERE proposal_id = ' . $iProposalId;
+        $oSelect = $db->sql_query($sSql);
+        return $db->sql_fetchrow($oSelect);
     }
 
     /**
@@ -647,5 +677,39 @@ class main
         $this->notification_manager->add_notifications(array(
             'rlip.intereststree.notification.type.inttree_proposal_accepted',
         ), $aNotificationData);
+    }
+
+    /**
+     * Zaakceptowanie lub odrzucenie głosu przez moderatora
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function proposalManage()
+    {
+        try {
+            global $db;
+            $iProposalId = (int)$this->request->variable('proposal_id', 0);
+            $iIsAccept = (int)$this->request->variable('is_accept', 1);
+            $this->_isUser();
+            $this->_isProposal($iProposalId);
+            if(!$this->_hasModPermission()){
+                throw new Exception('Brak uprawnień!');
+            }
+            $aProposal = $this->_getProposalById($iProposalId);
+            $sSql = 'DELETE FROM ' . $this->_getTablePrefix() . 'inttree_proposal where proposal_id = ' . $iProposalId;
+            $db->sql_query($sSql);
+            if($iIsAccept){
+                $this->_addAcceptedNotification($aProposal['proposal_user_id']);
+            } else {
+                $this->_addRejectedNotification($aProposal['proposal_user_id']);
+            }
+            return new \Symfony\Component\HttpFoundation\JsonResponse(array(
+                'success' => true
+            ));
+        } catch (Exception $e) {
+            return new \Symfony\Component\HttpFoundation\JsonResponse(array(
+                'success' => false,
+                'message' => $e->getMessage()
+            ));
+        }
     }
 }

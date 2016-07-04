@@ -8,7 +8,7 @@ if (empty($lang) || !is_array($lang)) {
 }
 
 $lang = array_merge($lang, array(
-    'RLIP_USERSMAP_NAVI_NAME' => 'Mapa',
+    'RLIP_USERSMAP_NAVI_NAME' => 'Mapa użytkowników',
     'RLIP_USERSMAP_MODULE_NAME' => 'Moduł mapy użytkowników',
     'RLIP_USERSMAP_SETTINGS_TITLE' => 'Ustawienia',
     'RLIP_USERSMAP_SETTINGS_SERVER_KEY' => 'Klucz serwera mapy google',

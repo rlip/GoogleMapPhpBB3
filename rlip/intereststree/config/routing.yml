@@ -20,3 +20,6 @@ rlip_intereststree_controller_proposalvote:
 rlip_intereststree_controller_proposalmanage:
     path: /intereststree/proposalManage
     defaults: { _controller: rlip.intereststree.controller:proposalManage }
+rlip_intereststree_controller_treemanage:
+    path: /intereststree/proposalManage
+    defaults: { _controller: rlip.intereststree.controller:treeManage }

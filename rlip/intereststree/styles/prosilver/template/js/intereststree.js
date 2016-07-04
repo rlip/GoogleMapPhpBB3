@@ -153,13 +153,13 @@ intTree.onProposalAccept = function (element) {
     if(!confirm('Czy na pewno chcesz ZAAKCEPTOWAĆ propozycję?')){
         return;
     }
-    intTree.onProposalManage(element, true);
+    intTree.onProposalManage(element, 1);
 }
 intTree.onProposalReject = function (element) {
     if(!confirm('Czy na pewno chcesz ODRZUCIĆ propozycję?')){
         return;
     }
-    intTree.onProposalManage(element, false);
+    intTree.onProposalManage(element, 0);
 }
 
 intTree.onProposalManage = function (element, isAccept) {

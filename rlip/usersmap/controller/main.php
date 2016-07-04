@@ -52,8 +52,8 @@ class main
         $aData = array();
 
         while ($row = $db->sql_fetchrow($result)) {
-            $sCode = preg_replace('/[^0-9\-]/', '', $row['pf_postal_code']);
-            if (strlen($sCode) != 6) {
+            $sCode = trim($row['pf_postal_code']);
+            if (!preg_match('/^[0-9]{2}-[0-9]{3}$/', $sCode) ){
                 continue;
             }
             if (!$row['latitude'] || !$row['longitude']) {

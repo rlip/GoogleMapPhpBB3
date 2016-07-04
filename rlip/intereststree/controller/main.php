@@ -191,6 +191,40 @@ class main
             throw new \phpbb\exception\http_exception(500, 'GENERAL_ERROR');
         }
     }
+    /**
+     * Zarządzaj drzewem
+     * @throws \phpbb\exception\http_exception
+     * @return \Symfony\Component\HttpFoundation\Response A Symfony Response object
+     */
+    public function treeManage()
+    {
+        try {
+            $this->_isUser();
+
+            $aInterests = $this->_getInterestsWithRate();
+            $aAllUsersData = $this->_getAllUserInterestsData();
+
+            $aTree = array(
+                'label' => 'Drzewo zainteresowań',
+                'amount' => pow(2, self::MAX_LEVEL),
+                'selectionAllowed' => 0,
+                'level' => 0,
+                'id' => 0,
+                'usersCounter' => 0,
+                'usersInNode' => array(),
+                'children' => $this->_createTreeData($aInterests, 0, 1, $aAllUsersData)
+            );
+
+            $this->_getUsersCounter($aTree);
+
+            $this->template->assign_vars(array(
+                'HAS_MOD_PERMISSION' => $this->_hasModPermission()
+            ));
+            return $this->helper->render('intereststree.html', 'Drzewo zainteresowań');
+        } catch (Exception $e) {
+            throw new \phpbb\exception\http_exception(500, 'GENERAL_ERROR');
+        }
+    }
 
     /**
      * Zwraca tablicę id użytkowników mających zainteresowanie w danym nodzie

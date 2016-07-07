@@ -16,7 +16,7 @@ class main
     const MAX_LEVEL = 16;
     const MAX_PROPOSAL_COUNTER = 10;
     const SUM_TO_PROPOSAL_DELETE = -10;
-    const USER_INACTIVE_DAYS = 5;
+    const USER_INACTIVE_DAYS = 60;
 
     /* @var \phpbb\config\config */
     protected $config;

@@ -189,3 +189,4 @@ intTree.onProposalManage = function (element, isAccept) {
         }
     });
 }
+

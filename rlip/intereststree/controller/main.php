@@ -16,6 +16,7 @@ class main
     const MAX_LEVEL = 16;
     const MAX_PROPOSAL_COUNTER = 10;
     const SUM_TO_PROPOSAL_DELETE = -10;
+    const USER_INACTIVE_DAYS = 5;
 
     /* @var \phpbb\config\config */
     protected $config;
@@ -267,6 +268,14 @@ class main
     }
 
     /**
+     * Zwraca czas, od którego użytkownik musi się zalogować
+     * @return int
+     */
+    protected function _getUserInactiveTime(){
+        return time() - (60 * 60 * 24 * self::USER_INACTIVE_DAYS);
+    }
+
+    /**
      * Zwraca zainteresowania wszystkich użytkowników
      * @return array
      */
@@ -274,6 +283,7 @@ class main
     {
         global $db;
         $sSql = 'SELECT userhasinterest_interest_id, userhasinterest_user_id FROM ' . $this->_getTablePrefix() . 'inttree_user_has_interest';
+        $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on userhasinterest_user_id = user_id AND user_lastvisit > ' . $this->_getUserInactiveTime();
         $oUserHasInterestSelect = $db->sql_query($sSql);
         $aData = array();
         while ($aRow = $db->sql_fetchrow($oUserHasInterestSelect)) {
@@ -547,7 +557,7 @@ class main
         $sSql = 'SELECT userhasinterest_user_id, userhasinterest_interest_id, userhasinterest_rate, username,';
         $sSql .= ' (userhasinterest_rate / (SELECT SUM(userhasinterest_rate) FROM phpbb_inttree_user_has_interest inner_tab WHERE inner_tab.userhasinterest_user_id = outer_tab.userhasinterest_user_id) * 100) AS percent';
         $sSql .= ' FROM ' . $this->_getTablePrefix() . 'inttree_user_has_interest outer_tab';
-        $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on userhasinterest_user_id = user_id';
+        $sSql .= ' INNER JOIN ' . USERS_TABLE . ' on userhasinterest_user_id = user_id AND user_lastvisit > ' . $this->_getUserInactiveTime();
         $sSql .= ' WHERE userhasinterest_interest_id IN(' . implode(',', $iInterestChildrenIds) . ')';
         $sSql .= ' ORDER BY percent DESC';
         $oUserHasInterestSelect = $db->sql_query($sSql);

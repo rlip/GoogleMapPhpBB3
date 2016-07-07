@@ -94,6 +94,6 @@ class main
         }
         $this->template->assign_var('USERS_DATA', json_encode(array_values($aData)));
         $this->template->assign_var('JS_KEY', $config['rlip_usersmap_js_key']);
-        return $this->helper->render('map_body.html');
+        return $this->helper->render('map_body.html', 'Mapa użytkowników');
     }
 }
